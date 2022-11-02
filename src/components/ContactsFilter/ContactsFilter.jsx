@@ -1,36 +1,34 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { nanoid } from 'nanoid';
 import PropTypes from 'prop-types';
 
 import { FormLabel, FormInput } from './ContactsFilter.styled';
 
-class ContactsFilter extends Component {
-  filterInputId = nanoid();
+const filterInputId = nanoid();
 
-  handleChange = e => {
+const ContactsFilter = ({ filterContactsBySearch, filter }) => {
+  const handleChange = e => {
     let currentValue = e.target.value;
-    this.props.filterFunc(currentValue);
+    filterContactsBySearch(currentValue);
   };
 
-  render() {
-    const { filter } = this.props;
-    return (
-      <FormLabel key={this.filterInputId}>
-        Find contacts by name
-        <FormInput
-          value={filter}
-          type="text"
-          name="filter"
-          id={this.filterInputId}
-          onChange={this.handleChange}
-        />
-      </FormLabel>
-    );
-  }
-}
+  return (
+    <FormLabel key={filterInputId}>
+      Find contacts by name
+      <FormInput
+        value={filter}
+        type="text"
+        name="filter"
+        id={filterInputId}
+        onChange={handleChange}
+      />
+    </FormLabel>
+  );
+};
 
 ContactsFilter.propTypes = {
-  filterFunc: PropTypes.func.isRequired,
+  filterContactsBySearch: PropTypes.func.isRequired,
+  filter: PropTypes.array,
 };
 
 export default ContactsFilter;

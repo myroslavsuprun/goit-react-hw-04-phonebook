@@ -1,18 +1,15 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import { SectionTag, Heading } from './Section.styled';
 
-class Section extends Component {
-  render() {
-    const { title } = this.props;
-    return (
-      <SectionTag>
-        {title && <Heading>{title}</Heading>}
-        {this.props.children}
-      </SectionTag>
-    );
-  }
+function Section({ title, children }) {
+  return (
+    <SectionTag>
+      {title && <Heading>{title}</Heading>}
+      {children}
+    </SectionTag>
+  );
 }
 
 Section.propTypes = {
