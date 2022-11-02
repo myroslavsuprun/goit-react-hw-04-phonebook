@@ -21,6 +21,7 @@ function App() {
     localStorage.setItem('contacts', JSON.stringify(contacts));
 
     filterContactsBySearch(previousFilterQuery);
+    // eslint-disable-next-line
   }, [contacts]);
 
   function onSubmit(contact) {
