@@ -4,51 +4,72 @@ import AddContactForm from './AddContactForm/AddContactForm';
 import Section from './Section/Section';
 import ContactsList from './ContactsList/ContactsList';
 import ContactsFilter from './ContactsFilter/ContactsFilter';
+import { useCallback } from 'react';
 
-let previousFilterQuery = '';
+const CONTACTS_STATUS_TYPE = {
+  contacts: 'contacts',
+  filtered: 'filtered',
+};
 
 function App() {
-  const [contacts, setContacts] = useState(null);
-  const [filteredContacts, setFilteredCotnacts] = useState(null);
+  const [contacts, setContacts] = useState(
+    JSON.parse(localStorage.getItem('contacts')) || []
+  );
+  const [filteredContacts, setFilteredCotnacts] = useState([]);
+  const [contactsStatus, setContactsStatus] = useState(
+    CONTACTS_STATUS_TYPE.contacts
+  );
+  const [previousSearchQuery, setPreviousSearchQuery] = useState('');
+
+  const filterContactsBySearchMemo = useCallback(filterContactsBySearch, [
+    contacts,
+    previousSearchQuery,
+  ]);
 
   useEffect(() => {
-    setContacts(JSON.parse(localStorage.getItem('contacts')) || []);
-  }, []);
-
-  useEffect(() => {
-    if (!contacts) return;
-
     localStorage.setItem('contacts', JSON.stringify(contacts));
 
-    filterContactsBySearch(previousFilterQuery);
-    // eslint-disable-next-line
-  }, [contacts]);
+    if (contactsStatus === CONTACTS_STATUS_TYPE.filtered) {
+      filterContactsBySearchMemo();
+    }
+  }, [contacts, contactsStatus, filterContactsBySearchMemo]);
 
-  function onSubmit(contact) {
+  function onContactAddition(contact) {
     const foundContact = contacts.find(contactFromState => {
       const currentContact = contactFromState.name.toLowerCase();
       return currentContact === contact.name.toLowerCase();
     });
 
-    if (foundContact) return alert(`${contact.name} is already in contacts`);
+    if (foundContact) {
+      return alert(`${contact.name} is already in contacts`);
+    }
 
     setContacts([...contacts, contact]);
   }
 
-  function filterContactsBySearch(filterQuery) {
+  function filterContactsBySearch(searchQuery = previousSearchQuery) {
     const newFilteredContacts = contacts.filter(contact => {
       const contactName = contact.name.toLowerCase();
-      return contactName.includes(filterQuery.toLowerCase());
+      return contactName.includes(searchQuery.toLowerCase());
     });
 
+    setPreviousSearchQuery(searchQuery);
+
+    if (searchQuery === '') {
+      setContactsStatus(CONTACTS_STATUS_TYPE.contacts);
+      return;
+    }
+
+    setContactsStatus(CONTACTS_STATUS_TYPE.filtered);
     setFilteredCotnacts(newFilteredContacts);
-    previousFilterQuery = filterQuery;
   }
 
   function contactsToPass() {
-    if (filteredContacts) return filteredContacts;
+    if (contactsStatus === CONTACTS_STATUS_TYPE.filtered) {
+      return filteredContacts;
+    }
 
-    return contacts ? contacts : [];
+    return contacts;
   }
 
   function onContactDelete(contactName) {
@@ -64,7 +85,7 @@ function App() {
   return (
     <>
       <Section title="Phonebook">
-        <AddContactForm onSubmit={onSubmit} />
+        <AddContactForm onSubmit={onContactAddition} />
       </Section>
       <Section title="Contacts">
         <ContactsFilter filterContactsBySearch={filterContactsBySearch} />
