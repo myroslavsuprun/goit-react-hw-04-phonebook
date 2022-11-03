@@ -6,10 +6,10 @@ import { FormLabel, FormInput } from './ContactsFilter.styled';
 
 const filterInputId = nanoid();
 
-const ContactsFilter = ({ filterContactsBySearch, filter }) => {
+const ContactsFilter = ({ onFilterChange, filter }) => {
   const handleChange = e => {
     let currentValue = e.target.value;
-    filterContactsBySearch(currentValue);
+    onFilterChange(currentValue);
   };
 
   return (
@@ -27,7 +27,7 @@ const ContactsFilter = ({ filterContactsBySearch, filter }) => {
 };
 
 ContactsFilter.propTypes = {
-  filterContactsBySearch: PropTypes.func.isRequired,
+  onFilterChange: PropTypes.func.isRequired,
   filter: PropTypes.array,
 };
 

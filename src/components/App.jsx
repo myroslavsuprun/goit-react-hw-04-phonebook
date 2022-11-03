@@ -4,35 +4,16 @@ import AddContactForm from './AddContactForm/AddContactForm';
 import Section from './Section/Section';
 import ContactsList from './ContactsList/ContactsList';
 import ContactsFilter from './ContactsFilter/ContactsFilter';
-import { useCallback } from 'react';
-
-const CONTACTS_STATUS_TYPE = Object.freeze({
-  contacts: 'contacts',
-  filtered: 'filtered',
-});
 
 function App() {
   const [contacts, setContacts] = useState(
     JSON.parse(localStorage.getItem('contacts')) || []
   );
-  const [filteredContacts, setFilteredCotnacts] = useState([]);
-  const [contactsStatus, setContactsStatus] = useState(
-    CONTACTS_STATUS_TYPE.contacts
-  );
-  const [previousSearchQuery, setPreviousSearchQuery] = useState('');
-
-  const filterContactsBySearchMemo = useCallback(filterContactsBySearch, [
-    contacts,
-    previousSearchQuery,
-  ]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     localStorage.setItem('contacts', JSON.stringify(contacts));
-
-    if (contactsStatus === CONTACTS_STATUS_TYPE.filtered) {
-      filterContactsBySearchMemo();
-    }
-  }, [contacts, contactsStatus, filterContactsBySearchMemo]);
+  }, [contacts]);
 
   function onContactAddition(contact) {
     const foundContact = contacts.find(contactFromState => {
@@ -47,21 +28,8 @@ function App() {
     setContacts([...contacts, contact]);
   }
 
-  function filterContactsBySearch(searchQuery = previousSearchQuery) {
-    const newFilteredContacts = contacts.filter(contact => {
-      const contactName = contact.name.toLowerCase();
-      return contactName.includes(searchQuery.toLowerCase());
-    });
-
-    setPreviousSearchQuery(searchQuery);
-
-    if (searchQuery === '') {
-      setContactsStatus(CONTACTS_STATUS_TYPE.contacts);
-      return;
-    }
-
-    setContactsStatus(CONTACTS_STATUS_TYPE.filtered);
-    setFilteredCotnacts(newFilteredContacts);
+  function onFilterChange(newSearchQuery) {
+    setSearchQuery(newSearchQuery);
   }
 
   function onContactDelete(contactName) {
@@ -74,13 +42,14 @@ function App() {
     setContacts(newContacts);
   }
 
-  function contactsToPass() {
-    if (contactsStatus === CONTACTS_STATUS_TYPE.filtered) {
-      return filteredContacts;
-    }
-
-    return contacts;
+  function getFilteredContacts() {
+    return contacts.filter(contact => {
+      const contactName = contact.name.toLowerCase();
+      return contactName.includes(searchQuery.toLowerCase());
+    });
   }
+
+  const filteredContacts = getFilteredContacts();
 
   return (
     <>
@@ -88,10 +57,10 @@ function App() {
         <AddContactForm onSubmit={onContactAddition} />
       </Section>
       <Section title="Contacts">
-        <ContactsFilter filterContactsBySearch={filterContactsBySearch} />
+        <ContactsFilter onFilterChange={onFilterChange} />
         <ContactsList
           onDeleteClick={onContactDelete}
-          contacts={contactsToPass()}
+          contacts={filteredContacts}
         />
       </Section>
     </>
