@@ -6,10 +6,10 @@ import ContactsList from './ContactsList/ContactsList';
 import ContactsFilter from './ContactsFilter/ContactsFilter';
 import { useCallback } from 'react';
 
-const CONTACTS_STATUS_TYPE = {
+const CONTACTS_STATUS_TYPE = Object.freeze({
   contacts: 'contacts',
   filtered: 'filtered',
-};
+});
 
 function App() {
   const [contacts, setContacts] = useState(
@@ -64,14 +64,6 @@ function App() {
     setFilteredCotnacts(newFilteredContacts);
   }
 
-  function contactsToPass() {
-    if (contactsStatus === CONTACTS_STATUS_TYPE.filtered) {
-      return filteredContacts;
-    }
-
-    return contacts;
-  }
-
   function onContactDelete(contactName) {
     const newContacts = contacts.filter(contact => {
       if (contactName === contact.name) return false;
@@ -82,6 +74,14 @@ function App() {
     setContacts(newContacts);
   }
 
+  function contactsToPass() {
+    if (contactsStatus === CONTACTS_STATUS_TYPE.filtered) {
+      return filteredContacts;
+    }
+
+    return contacts;
+  }
+
   return (
     <>
       <Section title="Phonebook">
@@ -90,8 +90,8 @@ function App() {
       <Section title="Contacts">
         <ContactsFilter filterContactsBySearch={filterContactsBySearch} />
         <ContactsList
-          contacts={contactsToPass()}
           onDeleteClick={onContactDelete}
+          contacts={contactsToPass()}
         />
       </Section>
     </>
